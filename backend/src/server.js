@@ -1,10 +1,15 @@
+const path = require('path');
+const fs = require('fs');
+
+// Load environment variables from backend/.env or root .env
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const path = require('path');
-const fs = require('fs');
 
 const { errorHandler } = require('./middleware/errorHandler');
 
@@ -22,7 +27,7 @@ const reportRoutes = require('./routes/reportRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5050;
 
 // Security & Parsing Middleware
 app.use(helmet({
