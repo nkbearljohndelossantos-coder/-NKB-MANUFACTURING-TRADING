@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { CheckCircle2, AlertTriangle, AlertCircle, Info, X } from 'lucide-react';
 
 const ToastContext = createContext(null);
@@ -6,7 +6,11 @@ const ToastContext = createContext(null);
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = (message, type = 'info', duration = 4000) => {
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const addToast = useCallback((message, type = 'info', duration = 4000) => {
     const id = Date.now() + Math.random();
     setToasts(prev => [...prev, { id, message, type }]);
 
@@ -15,13 +19,11 @@ export const ToastProvider = ({ children }) => {
         removeToast(id);
       }, duration);
     }
-  };
+  }, [removeToast]);
 
-  const removeToast = (id) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
-
-  const toast = {
+  const toastObj = {
+    addToast,
+    removeToast,
     success: (msg, dur) => addToast(msg, 'success', dur),
     error: (msg, dur) => addToast(msg, 'error', dur),
     warning: (msg, dur) => addToast(msg, 'warning', dur),
@@ -29,7 +31,7 @@ export const ToastProvider = ({ children }) => {
   };
 
   return (
-    <ToastContext.Provider value={toast}>
+    <ToastContext.Provider value={toastObj}>
       {children}
       <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md w-full pointer-events-none">
         {toasts.map(t => (
@@ -60,4 +62,18 @@ export const ToastProvider = ({ children }) => {
   );
 };
 
-export const useToast = () => useContext(ToastContext);
+export const useToast = () => {
+  const context = useContext(ToastContext);
+  if (!context) {
+    const fallbackAdd = (msg, type) => console.log(`[TOAST ${type || 'INFO'}]: ${msg}`);
+    return {
+      addToast: fallbackAdd,
+      removeToast: () => {},
+      success: (msg) => fallbackAdd(msg, 'SUCCESS'),
+      error: (msg) => fallbackAdd(msg, 'ERROR'),
+      warning: (msg) => fallbackAdd(msg, 'WARNING'),
+      info: (msg) => fallbackAdd(msg, 'INFO'),
+    };
+  }
+  return context;
+};
