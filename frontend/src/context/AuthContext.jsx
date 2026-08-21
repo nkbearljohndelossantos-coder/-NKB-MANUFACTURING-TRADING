@@ -8,6 +8,23 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('b2b_token'));
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem('b2b_token');
+    setToken(null);
+    setUser(null);
+  };
+
+  const login = async (username, password) => {
+    const res = await api.post('/auth/login', { username, password });
+    if (res.success && res.token) {
+      localStorage.setItem('b2b_token', res.token);
+      setToken(res.token);
+      setUser(res.user);
+      return res.user;
+    }
+    throw new Error(res.message || 'Login failed');
+  };
+
   useEffect(() => {
     async function loadUser() {
       const storedToken = localStorage.getItem('b2b_token');
@@ -29,23 +46,6 @@ export const AuthProvider = ({ children }) => {
     }
     loadUser();
   }, []);
-
-  const login = async (username, password) => {
-    const res = await api.post('/auth/login', { username, password });
-    if (res.success && res.token) {
-      localStorage.setItem('b2b_token', res.token);
-      setToken(res.token);
-      setUser(res.user);
-      return res.user;
-    }
-    throw new Error(res.message || 'Login failed');
-  };
-
-  const logout = () => {
-    localStorage.removeItem('b2b_token');
-    setToken(null);
-    setUser(null);
-  };
 
   return (
     <AuthContext.Provider value={{ user, token, loading, login, logout, isAuthenticated: !!user }}>
