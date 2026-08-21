@@ -2,8 +2,8 @@
   RewriteEngine On
   RewriteBase /
 
-  # 1. Reverse Proxy API requests to Node.js Backend Server on port 5050 (or 5000)
-  RewriteRule ^api/(.*)$ http://127.0.0.1:5050/api/$1 [P,L]
+  # 1. Allow Passenger / Node.js Express to handle /api natively
+  RewriteRule ^api - [L]
 
   # 2. SPA Routing: Send all non-file/directory requests to index.html
   RewriteRule ^index\.html$ - [L]
