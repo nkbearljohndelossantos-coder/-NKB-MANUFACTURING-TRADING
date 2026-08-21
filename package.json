@@ -1,0 +1,25 @@
+{
+  "name": "client-order-delivery-variance-billing-system",
+  "version": "1.0.0",
+  "description": "Production-ready B2B Client Order, Delivery, Variance, Billing and Payment Management Web Application",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "start": "npm run start --prefix backend",
+    "build": "npm run build --prefix frontend",
+    "migrate": "npm run migrate --prefix backend",
+    "seed": "npm run seed --prefix backend",
+    "test": "npm run test --prefix backend"
+  },
+  "keywords": [
+    "b2b",
+    "order-management",
+    "delivery",
+    "variance",
+    "billing",
+    "erp"
+  ],
+  "author": "NKB Enterprise IT Engineering",
+  "license": "ISC"
+}
