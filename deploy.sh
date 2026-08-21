@@ -19,6 +19,7 @@ npm install --prefix frontend
 # 3. Build Production Frontend (Vite)
 echo "[3/6] Building production frontend..."
 npm run build --prefix frontend
+cp -r frontend/dist/* . 2>/dev/null || true
 
 # 4. Verify/Create Production Environment File
 if [ ! -f "backend/.env" ]; then
