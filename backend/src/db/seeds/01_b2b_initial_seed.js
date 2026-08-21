@@ -133,6 +133,7 @@ exports.seed = async function(knex) {
     { username: 'admin', full_name: 'System Administrator', email: 'admin@nkbmanufacturing.com', role: 'ADMIN' },
     { username: 'manager', full_name: 'Operations Manager', email: 'manager@nkbmanufacturing.com', role: 'MANAGER' },
     { username: 'sales', full_name: 'Senior Sales Executive', email: 'sales@nkbmanufacturing.com', role: 'SALES' },
+    { username: 'production', full_name: 'Production & Compounding Supervisor', email: 'production@nkbmanufacturing.com', role: 'PRODUCTION' },
     { username: 'warehouse', full_name: 'Warehouse Logistics Supervisor', email: 'warehouse@nkbmanufacturing.com', role: 'WAREHOUSE' },
     { username: 'accounting', full_name: 'Chief Accountant', email: 'accounting@nkbmanufacturing.com', role: 'ACCOUNTING' },
     { username: 'client_abc', full_name: 'Maria Santos (ABC Cosmetics)', email: 'client@abccosmetics.com', role: 'CLIENT', client_id: clientAbcId }

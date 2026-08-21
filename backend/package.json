@@ -9,7 +9,7 @@
     "migrate": "knex migrate:latest",
     "migrate:rollback": "knex migrate:rollback",
     "seed": "knex seed:run",
-    "test": "node tests/b2b_workflow.test.js && node tests/b2b_manufacturing_scenarios.test.js"
+    "test": "node tests/b2b_workflow.test.js && node tests/b2b_manufacturing_scenarios.test.js && node tests/b2b_production_readiness.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
