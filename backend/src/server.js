@@ -61,9 +61,13 @@ app.use('/api/b2b/payments', paymentRoutes);
 app.use('/api/b2b/reports', reportRoutes);
 app.use('/api/b2b/audit-logs', auditRoutes);
 
-// Serve Frontend in Production if dist folder exists
-const frontendDistPath = path.join(__dirname, '../../frontend/dist');
-if (fs.existsSync(frontendDistPath)) {
+// Serve Frontend in Production
+const possibleDistPaths = [
+  path.join(__dirname, '../../frontend/dist'),
+  path.join(__dirname, '../..')
+];
+const frontendDistPath = possibleDistPaths.find(p => fs.existsSync(path.join(p, 'index.html')));
+if (frontendDistPath) {
   app.use(express.static(frontendDistPath));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
