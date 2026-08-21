@@ -67,4 +67,56 @@ async function deductInventoryForDelivery({
   }
 }
 
-module.exports = { deductInventoryForDelivery };
+/**
+ * Generic inventory receipt or adjustment posting
+ */
+async function postInventoryTransaction({
+  productId,
+  batchId,
+  transactionType,
+  quantity,
+  referenceType,
+  referenceId,
+  notes,
+  userId
+}, trx) {
+  const runner = trx || db;
+  const product = await runner('b2b_products').where('id', productId).forUpdate().first();
+  if (!product) throw new Error(`Product with ID ${productId} not found`);
+
+  const previousStock = Number(product.current_stock || 0);
+  const newStock = previousStock + Number(quantity);
+
+  await runner('b2b_products').where('id', productId).update({
+    current_stock: newStock,
+    updated_at: runner.fn.now()
+  });
+
+  if (batchId) {
+    const batch = await runner('b2b_product_batches').where('id', batchId).forUpdate().first();
+    if (batch) {
+      const prevBatchStock = Number(batch.quantity_available || 0);
+      await runner('b2b_product_batches').where('id', batchId).update({
+        quantity_available: prevBatchStock + Number(quantity)
+      });
+    }
+  }
+
+  const [txId] = await runner('b2b_inventory_transactions').insert({
+    product_id: productId,
+    batch_id: batchId || null,
+    transaction_type: transactionType,
+    reference_type: referenceType,
+    reference_id: referenceId,
+    quantity: quantity,
+    previous_stock: previousStock,
+    new_stock: newStock,
+    remarks: notes,
+    created_by: userId
+  });
+
+  return { id: txId, previousStock, newStock };
+}
+
+module.exports = { deductInventoryForDelivery, postInventoryTransaction };
+

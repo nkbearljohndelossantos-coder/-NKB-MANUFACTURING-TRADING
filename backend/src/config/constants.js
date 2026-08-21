@@ -3,6 +3,7 @@ module.exports = {
     ADMIN: 'ADMIN',
     MANAGER: 'MANAGER',
     SALES: 'SALES',
+    PRODUCTION: 'PRODUCTION',
     WAREHOUSE: 'WAREHOUSE',
     ACCOUNTING: 'ACCOUNTING',
     CLIENT: 'CLIENT'
@@ -10,14 +11,62 @@ module.exports = {
   ORDER_STATUS: {
     DRAFT: 'Draft',
     SUBMITTED: 'Submitted',
-    CONFIRMED: 'Confirmed',
-    IN_PREPARATION: 'In Preparation',
+    UNDER_REVIEW: 'Under Review',
+    APPROVED: 'Approved',
+    REJECTED: 'Rejected',
+    CANCELLED: 'Cancelled',
+    FOR_PRODUCTION: 'For Production',
+    IN_PRODUCTION: 'In Production',
     READY_FOR_DELIVERY: 'Ready for Delivery',
+    PARTIALLY_DELIVERED: 'Partially Delivered',
     DELIVERED: 'Delivered',
-    PARTIALLY_INVOICED: 'Partially Invoiced',
     INVOICED: 'Invoiced',
-    COMPLETED: 'Completed',
-    CANCELLED: 'Cancelled'
+    PARTIALLY_PAID: 'Partially Paid',
+    PAID: 'Paid',
+    COMPLETED: 'Completed'
+  },
+  PRODUCTION_STATUS: {
+    PLANNED: 'PLANNED',
+    RELEASED: 'RELEASED',
+    IN_PRODUCTION: 'IN_PRODUCTION',
+    COMPLETED: 'COMPLETED',
+    CANCELLED: 'CANCELLED',
+    ON_HOLD: 'ON_HOLD'
+  },
+  PRODUCTION_VARIANCE_TYPE: {
+    OVERPRODUCTION: 'OVERPRODUCTION',
+    SHORT_PRODUCTION: 'SHORT_PRODUCTION'
+  },
+  PRODUCTION_VARIANCE_REASONS: {
+    COMPOUNDING_YIELD: 'Compounding Yield',
+    PRODUCTION_OVERRUN: 'Production Overrun',
+    BATCH_REQUIREMENT: 'Batch Requirement',
+    FILLING_VARIANCE: 'Filling Line Variance',
+    PACKAGING_VARIANCE: 'Packaging Variance',
+    PROCESS_LOSS: 'Process Loss',
+    RAW_MATERIAL_DEFECT: 'Raw Material Defect',
+    REPLACEMENT: 'Replacement',
+    OTHER: 'Other'
+  },
+  DISPOSITION_TYPES: {
+    FOC: 'FOC',
+    ADDITIONAL_SALE: 'ADDITIONAL_SALE',
+    FINISHED_GOODS_STOCK: 'FINISHED_GOODS_STOCK',
+    REWORK: 'REWORK',
+    SCRAP: 'SCRAP',
+    OTHER: 'OTHER'
+  },
+  SHORTAGE_RESOLUTION_TYPES: {
+    PARTIAL_DELIVERY_ACCEPTANCE: 'Partial Delivery Acceptance',
+    BACKORDER_REMAINDER: 'Backorder Remainder',
+    CANCEL_SHORTAGE: 'Cancel Shortage',
+    SCRAP_SHORTAGE: 'Scrap Shortage'
+  },
+  DELIVERY_VARIANCE_SOURCES: {
+    PRODUCTION_OVERRUN: 'Production Overrun',
+    WAREHOUSE_DISPATCH_VARIANCE: 'Warehouse Dispatch Variance',
+    SAMPLE_ADDITION: 'Sample Addition',
+    CLIENT_ADDITIONAL_REQUEST: 'Client Additional Request'
   },
   DELIVERY_STATUS: {
     PREPARING: 'Preparing',
@@ -25,26 +74,6 @@ module.exports = {
     DELIVERED: 'Delivered',
     VARIANCE_DETECTED: 'Variance Detected',
     COMPLETED: 'Completed'
-  },
-  VARIANCE_TYPE: {
-    OVER_DELIVERY: 'Over-Delivery',
-    UNDER_DELIVERY: 'Under-Delivery'
-  },
-  VARIANCE_REASONS: {
-    FOC: 'Free / FOC',
-    CLIENT_REQUEST: 'Client Requested Additional Quantity',
-    OVERRUN: 'Production Overrun',
-    REPLACEMENT: 'Replacement',
-    SAMPLE: 'Sample',
-    WAREHOUSE_ERROR: 'Warehouse Error',
-    OTHER: 'Other'
-  },
-  TREATMENTS: {
-    BILL_ORDERED: 'Bill Ordered Quantity',
-    BILL_DELIVERED: 'Bill Delivered Quantity',
-    PARTIAL_BILL: 'Partial Bill',
-    FOC: 'FOC',
-    PENDING_APPROVAL: 'Pending Approval'
   },
   INVOICE_STATUS: {
     UNPAID: 'Unpaid',

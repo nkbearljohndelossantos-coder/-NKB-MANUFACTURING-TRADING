@@ -6,6 +6,13 @@ exports.getClients = async (req, res, next) => {
     const { search, status } = req.query;
     let query = db('b2b_clients').select('*');
 
+    if (req.user.role === 'CLIENT') {
+      if (!req.user.client_id) {
+        return res.json({ success: true, data: [] });
+      }
+      query = query.where('id', req.user.client_id);
+    }
+
     if (search) {
       query = query.where(builder => {
         builder.where('company_name', 'like', `%${search}%`)

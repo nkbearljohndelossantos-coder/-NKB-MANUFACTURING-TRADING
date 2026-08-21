@@ -337,3 +337,166 @@ CREATE TABLE IF NOT EXISTS b2b_audit_logs (
   INDEX idx_audit_entity (entity_type, entity_id),
   INDEX idx_audit_action (action)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ==============================================================================
+-- MANUFACTURING, PRODUCTION OUTPUT, VARIANCE, DISPOSITION & SHORTAGE TABLES
+-- ==============================================================================
+
+-- 14. Production Orders
+CREATE TABLE IF NOT EXISTS b2b_production_orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  production_order_number VARCHAR(100) NOT NULL UNIQUE,
+  sales_order_id INT NOT NULL,
+  sales_order_item_id INT NULL,
+  client_id INT NOT NULL,
+  product_id INT NOT NULL,
+  batch_id INT NULL,
+  batch_number VARCHAR(100) NOT NULL,
+  target_quantity INT NOT NULL,
+  actual_produced_quantity INT NOT NULL DEFAULT 0,
+  unit VARCHAR(50) NOT NULL DEFAULT 'bottle',
+  planned_start_date DATE NULL,
+  planned_end_date DATE NULL,
+  actual_start_date DATE NULL,
+  actual_end_date DATE NULL,
+  production_status ENUM('PLANNED', 'RELEASED', 'IN_PRODUCTION', 'COMPLETED', 'CANCELLED', 'ON_HOLD') NOT NULL DEFAULT 'PLANNED',
+  manufacturing_date DATE NULL,
+  expiration_date DATE NULL,
+  remarks TEXT NULL,
+  created_by INT NULL,
+  approved_by INT NULL,
+  approved_at DATETIME NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (sales_order_id) REFERENCES b2b_sales_orders(id) ON DELETE RESTRICT,
+  FOREIGN KEY (client_id) REFERENCES b2b_clients(id) ON DELETE RESTRICT,
+  FOREIGN KEY (product_id) REFERENCES b2b_products(id) ON DELETE RESTRICT,
+  FOREIGN KEY (batch_id) REFERENCES b2b_product_batches(id) ON DELETE SET NULL,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_po_number (production_order_number),
+  INDEX idx_po_so (sales_order_id),
+  INDEX idx_po_product (product_id),
+  INDEX idx_po_status (production_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 15. Production Outputs (Multiple outputs per Production Order allowed)
+CREATE TABLE IF NOT EXISTS b2b_production_outputs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  production_order_id INT NOT NULL,
+  product_id INT NOT NULL,
+  batch_id INT NOT NULL,
+  batch_number VARCHAR(100) NOT NULL,
+  output_quantity INT NOT NULL,
+  output_date DATE NOT NULL,
+  operator_name VARCHAR(255) NULL,
+  supervisor_id INT NULL,
+  quality_status ENUM('PASSED', 'QUARANTINE', 'REJECTED') NOT NULL DEFAULT 'PASSED',
+  inventory_transaction_id INT NULL,
+  remarks TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (production_order_id) REFERENCES b2b_production_orders(id) ON DELETE RESTRICT,
+  FOREIGN KEY (product_id) REFERENCES b2b_products(id) ON DELETE RESTRICT,
+  FOREIGN KEY (batch_id) REFERENCES b2b_product_batches(id) ON DELETE RESTRICT,
+  FOREIGN KEY (supervisor_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (inventory_transaction_id) REFERENCES b2b_inventory_transactions(id) ON DELETE SET NULL,
+  INDEX idx_output_po (production_order_id),
+  INDEX idx_output_batch (batch_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 16. Production Variances (Bi-directional: OVERPRODUCTION & SHORT_PRODUCTION)
+CREATE TABLE IF NOT EXISTS b2b_production_variances (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  production_variance_number VARCHAR(100) NOT NULL UNIQUE,
+  production_order_id INT NOT NULL,
+  product_id INT NOT NULL,
+  batch_id INT NOT NULL,
+  target_quantity INT NOT NULL,
+  actual_quantity INT NOT NULL,
+  variance_quantity INT NOT NULL,
+  variance_type ENUM('OVERPRODUCTION', 'SHORT_PRODUCTION') NOT NULL,
+  variance_percentage DECIMAL(5,2) NOT NULL,
+  variance_reason ENUM('COMPOUNDING_YIELD', 'PRODUCTION_OVERRUN', 'BATCH_REQUIREMENT', 'FILLING_VARIANCE', 'PACKAGING_VARIANCE', 'PROCESS_LOSS', 'RAW_MATERIAL_DEFECT', 'REPLACEMENT', 'OTHER') NOT NULL,
+  status ENUM('PENDING_REVIEW', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING_REVIEW',
+  approved_by INT NULL,
+  approved_at DATETIME NULL,
+  remarks TEXT NULL,
+  created_by INT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (production_order_id) REFERENCES b2b_production_orders(id) ON DELETE RESTRICT,
+  FOREIGN KEY (product_id) REFERENCES b2b_products(id) ON DELETE RESTRICT,
+  FOREIGN KEY (batch_id) REFERENCES b2b_product_batches(id) ON DELETE RESTRICT,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_pv_po (production_order_id),
+  INDEX idx_pv_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 17. Production Dispositions (For Overproduction)
+CREATE TABLE IF NOT EXISTS b2b_production_dispositions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  production_variance_id INT NOT NULL,
+  production_order_id INT NOT NULL,
+  disposition_type ENUM('FOC', 'ADDITIONAL_SALE', 'FINISHED_GOODS_STOCK', 'REWORK', 'SCRAP', 'OTHER') NOT NULL,
+  allocated_quantity INT NOT NULL,
+  client_confirmation_required TINYINT(1) NOT NULL DEFAULT 0,
+  client_confirmation_status ENUM('NOT_REQUIRED', 'PENDING', 'ACCEPTED_AS_FOC', 'ACCEPTED_ADDITIONAL_SALE', 'ACCEPTED_ORDERED_ONLY', 'REJECTED') NOT NULL DEFAULT 'NOT_REQUIRED',
+  client_confirmed_by VARCHAR(255) NULL,
+  client_confirmed_at DATETIME NULL,
+  client_remarks TEXT NULL,
+  approved_by INT NULL,
+  approved_at DATETIME NULL,
+  remarks TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (production_variance_id) REFERENCES b2b_production_variances(id) ON DELETE RESTRICT,
+  FOREIGN KEY (production_order_id) REFERENCES b2b_production_orders(id) ON DELETE RESTRICT,
+  FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_disp_pv (production_variance_id),
+  INDEX idx_disp_po (production_order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 18. Production Shortages (For Short Production)
+CREATE TABLE IF NOT EXISTS b2b_production_shortages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  production_variance_id INT NOT NULL,
+  production_order_id INT NOT NULL,
+  shortage_quantity INT NOT NULL,
+  resolution_type ENUM('PARTIAL_DELIVERY_ACCEPTANCE', 'BACKORDER_REMAINDER', 'CANCEL_SHORTAGE', 'SCRAP_SHORTAGE') NOT NULL,
+  client_accepted TINYINT(1) NOT NULL DEFAULT 0,
+  client_confirmed_by VARCHAR(255) NULL,
+  client_confirmed_at DATETIME NULL,
+  manager_approved_by INT NULL,
+  manager_approved_at DATETIME NULL,
+  remarks TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (production_variance_id) REFERENCES b2b_production_variances(id) ON DELETE RESTRICT,
+  FOREIGN KEY (production_order_id) REFERENCES b2b_production_orders(id) ON DELETE RESTRICT,
+  FOREIGN KEY (manager_approved_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_shortage_pv (production_variance_id),
+  INDEX idx_shortage_po (production_order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 19. Delivery Variances (Root Cause Attribution)
+CREATE TABLE IF NOT EXISTS b2b_delivery_variances (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  delivery_id INT NOT NULL,
+  delivery_item_id INT NOT NULL,
+  product_id INT NOT NULL,
+  batch_id INT NULL,
+  ordered_quantity INT NOT NULL,
+  delivered_quantity INT NOT NULL,
+  variance_quantity INT NOT NULL,
+  variance_source ENUM('PRODUCTION_OVERRUN', 'WAREHOUSE_DISPATCH_VARIANCE', 'SAMPLE_ADDITION', 'CLIENT_ADDITIONAL_REQUEST') NOT NULL,
+  production_variance_id INT NULL,
+  status ENUM('RESOLVED', 'PENDING_APPROVAL') NOT NULL DEFAULT 'RESOLVED',
+  remarks TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (delivery_id) REFERENCES b2b_deliveries(id) ON DELETE RESTRICT,
+  FOREIGN KEY (delivery_item_id) REFERENCES b2b_delivery_items(id) ON DELETE RESTRICT,
+  FOREIGN KEY (product_id) REFERENCES b2b_products(id) ON DELETE RESTRICT,
+  FOREIGN KEY (batch_id) REFERENCES b2b_product_batches(id) ON DELETE SET NULL,
+  FOREIGN KEY (production_variance_id) REFERENCES b2b_production_variances(id) ON DELETE SET NULL,
+  INDEX idx_dv_delivery (delivery_id),
+  INDEX idx_dv_pv (production_variance_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
+const fs = require('fs');
 
 const { errorHandler } = require('./middleware/errorHandler');
 
@@ -12,6 +13,7 @@ const authRoutes = require('./routes/authRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const productionRoutes = require('./routes/productionRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
 const varianceRoutes = require('./routes/varianceRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
@@ -51,6 +53,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/b2b/clients', clientRoutes);
 app.use('/api/b2b/products', productRoutes);
 app.use('/api/b2b/orders', orderRoutes);
+app.use('/api/b2b/production', productionRoutes);
 app.use('/api/b2b/deliveries', deliveryRoutes);
 app.use('/api/b2b/variances', varianceRoutes);
 app.use('/api/b2b/invoices', invoiceRoutes);

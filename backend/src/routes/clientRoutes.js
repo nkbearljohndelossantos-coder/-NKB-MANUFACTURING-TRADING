@@ -6,7 +6,7 @@ const { requireRole } = require('../middleware/rbac');
 
 router.use(authenticateToken);
 
-router.get('/', requireRole(['ADMIN', 'MANAGER', 'SALES', 'ACCOUNTING']), clientController.getClients);
+router.get('/', requireRole(['ADMIN', 'MANAGER', 'SALES', 'ACCOUNTING', 'CLIENT']), clientController.getClients);
 router.get('/:id', requireRole(['ADMIN', 'MANAGER', 'SALES', 'ACCOUNTING', 'CLIENT']), clientController.getClientById);
 router.post('/', requireRole(['ADMIN', 'MANAGER', 'SALES']), clientController.createClient);
 router.put('/:id', requireRole(['ADMIN', 'MANAGER', 'SALES', 'ACCOUNTING']), clientController.updateClient);

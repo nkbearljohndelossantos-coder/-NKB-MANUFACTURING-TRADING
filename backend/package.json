@@ -5,11 +5,11 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node src/server.js",
+    "dev": "nodemon src/server.js",
     "migrate": "knex migrate:latest",
     "migrate:rollback": "knex migrate:rollback",
     "seed": "knex seed:run",
-    "test": "node tests/b2b_workflow.test.js"
+    "test": "node tests/b2b_workflow.test.js && node tests/b2b_manufacturing_scenarios.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -2,14 +2,17 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
-
 import Layout from './components/Layout';
+
+// Pages
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ClientsPage from './pages/ClientsPage';
 import ProductsPage from './pages/ProductsPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
+import ProductionOrdersPage from './pages/ProductionOrdersPage';
+import ProductionDetailPage from './pages/ProductionDetailPage';
 import DeliveriesPage from './pages/DeliveriesPage';
 import DeliveryDetailPage from './pages/DeliveryDetailPage';
 import VariancesPage from './pages/VariancesPage';
@@ -23,23 +26,19 @@ import ClientPortalPage from './pages/ClientPortalPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white font-bold text-sm">Validating Enterprise Session...</div>;
-  }
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  if (loading) return <div className="p-8 text-center text-slate-500">Authenticating...</div>;
+  if (!user) return <Navigate to="/login" replace />;
   return children;
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <ToastProvider>
+    <AuthProvider>
+      <ToastProvider>
+        <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-
+            
             <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<DashboardPage />} />
@@ -48,6 +47,8 @@ export default function App() {
               <Route path="products" element={<ProductsPage />} />
               <Route path="orders" element={<OrdersPage />} />
               <Route path="orders/:id" element={<OrderDetailPage />} />
+              <Route path="production" element={<ProductionOrdersPage />} />
+              <Route path="production/:id" element={<ProductionDetailPage />} />
               <Route path="deliveries" element={<DeliveriesPage />} />
               <Route path="deliveries/:id" element={<DeliveryDetailPage />} />
               <Route path="variances" element={<VariancesPage />} />
@@ -59,10 +60,10 @@ export default function App() {
               <Route path="audit-logs" element={<AuditLogsPage />} />
             </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
-        </ToastProvider>
-      </AuthProvider>
-    </BrowserRouter>
+        </BrowserRouter>
+      </ToastProvider>
+    </AuthProvider>
   );
 }

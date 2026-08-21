@@ -3,19 +3,21 @@ const db = require('../config/db');
 /**
  * Append-only enterprise audit logger
  */
-async function logAudit({
-  userId = null,
-  action,
-  module = 'B2B_SALES',
-  entityType,
-  entityId,
-  oldValues = null,
-  newValues = null,
-  reason = null,
-  ipAddress = null,
-  trx = null
-}) {
-  const executor = trx || db;
+async function logAudit(options, trxParam = null) {
+  const {
+    userId = null,
+    action,
+    module = 'B2B_SALES',
+    entityType,
+    entityId,
+    oldValues = null,
+    newValues = null,
+    reason = null,
+    ipAddress = null,
+    trx = null
+  } = options || {};
+
+  const executor = trx || trxParam || db;
   try {
     await executor('b2b_audit_logs').insert({
       user_id: userId,
