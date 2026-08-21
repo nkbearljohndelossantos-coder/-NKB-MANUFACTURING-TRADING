@@ -20,7 +20,7 @@ export default function LoginPage() {
       addToast('Welcome back! Successfully authenticated.', 'success');
       navigate('/dashboard');
     } catch (err) {
-      addToast(err.response?.data?.message || 'Invalid username or password', 'error');
+      addToast(err.message || 'Invalid username or password', 'error');
     } finally {
       setLoading(false);
     }

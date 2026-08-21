@@ -2,10 +2,11 @@
   RewriteEngine On
   RewriteBase /
 
-  # Proxy API calls to Node.js backend if running locally on port 5000/5050
-  # RewriteRule ^api/(.*) http://localhost:5050/api/$1 [P,L]
+  # 1. Do not rewrite API requests to index.html
+  RewriteCond %{REQUEST_URI} ^/api [NC]
+  RewriteRule ^ - [L]
 
-  # SPA Routing: Send all non-file/directory requests to index.html
+  # 2. SPA Routing: Send all non-file/directory requests to index.html
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
@@ -16,7 +17,7 @@
 # Prevent 403 Forbidden directory listing
 Options -Indexes +FollowSymLinks
 
-# Enable CORS and Security Headers
+# Enable Security Headers
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"
   Header set X-Frame-Options "SAMEORIGIN"
